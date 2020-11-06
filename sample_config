@@ -1,0 +1,6 @@
+[OneDns]
+domain = example.com
+subdomain = dyn
+id = 12345678
+username = your.account@one.com
+password = YourVerySecretPassword
