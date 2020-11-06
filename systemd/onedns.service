@@ -1,0 +1,11 @@
+[Unit]
+Description=OneDNS updates A-record on one.com
+After=network-online.target
+
+[Service]
+Type=simple
+User=username
+ExecStart=/path/to/python -m onedns --config /etc/onedns
+
+[Install]
+WantedBy=multi-user.target

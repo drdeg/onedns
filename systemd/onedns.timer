@@ -1,0 +1,10 @@
+[Unit]
+Description=OneDNS
+
+[Timer]
+# Run every 15 minutes other minute on the bottom 30 second
+OnCalendar=*-*-* *:0/4:30
+Unit=onedns.service
+
+[Install]
+WantedBy=timers.target
