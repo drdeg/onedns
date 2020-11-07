@@ -1,2 +1,2 @@
-requrests
+requests
 dnspython
