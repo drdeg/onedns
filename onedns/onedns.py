@@ -120,7 +120,7 @@ def updateARecord(args, ip):
     # KEEP THE QUOTATION MARKS!!!
 
     # CREDENTIALS
-    #USERNAME="david.degerfeldt@outlook.com"
+    #USERNAME="username@host.com"
     #PASSWORD="*****"
 
     # INITIATE SESSION
