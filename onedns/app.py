@@ -69,12 +69,12 @@ class OneDns:
             formatter_class=argparse.RawDescriptionHelpFormatter,
             add_help=True
         )
-        self._parser.add_argument('fqdn', type=str, help='FQDN of host to update, e.g. hostname.domain.org')
         #parser.add_argument('--domain', '-d', type=str, help='Base domain name, e.g. domain.org')
         #parser.add_argument('--subdomain', '-s', type=str, help='Subdomain to update, e.g. hostname')
         self._parser.add_argument('--username', type=str, help='Username at one.com')
         self._parser.add_argument('--password', type=str, help='Password at one.com')
         #self._parser.add_argument('--id', '-i', type=str, help='ID of corresponding A-record at one.com')
+        self._parser.add_argument('--fqdn', type=str, help='FQDN of host to update, e.g. hostname.domain.org')
         self._parser.add_argument('--timeout', '-t', type=int, help='Timeout in seconds (TTL)')
         self._parser.add_argument('--force', action='store_true', help='Force update of A-record')
         self._parser.add_argument('--log', help='Set log level', choices=['CRITICAL','ERROR','WARNING','INFO','DEBUG'], default='INFO')
