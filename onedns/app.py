@@ -76,6 +76,7 @@ class OneDns:
         self._parser.add_argument('--timeout', '-t', type=int, help='Timeout in seconds (TTL)')
         self._parser.add_argument('--log', help='Set log level', choices=['CRITICAL','ERROR','WARNING','INFO','DEBUG'], default='INFO')
         self._parser.add_argument('--simulate', '-s', action='store_true', help='Just simulate, don''t update the record')
+        self._parser.add_argument('--force', action='store_true', help='Force update, even if IPs match')
 
     def parseConfig(self):
         """ Parses argument list and configuration file """
@@ -184,7 +185,10 @@ class OneDns:
         # Check if the resolved IP matches the public IP
         if publicIp == resolvedIp:
             logger.info(f"Public IP and resolved IP matches ({resolvedIp}), no need to update DNS record.")
-            if not self._args.force:
+            if self._args.force:
+                logger.warning('Force is specified. Updating record anyway')
+                self.updateRecord(publicIp)
+            else:
                 return
         else:
             logger.info(f'Detected change of public IP address from {resolvedIp} to {publicIp}. Need to update DNS record.')
