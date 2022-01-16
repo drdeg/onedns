@@ -87,8 +87,8 @@ class OneDns:
 
         if args.config:
             config = ConfigParser()
-            self.read([args.config])
-            self._defaults.update( dict(self.config.items('OneDns')))
+            config.read([args.config])
+            self._defaults.update( dict(config.items('OneDns')))
 
         # Update the defaults 
         self._parser.set_defaults(**self._defaults)
