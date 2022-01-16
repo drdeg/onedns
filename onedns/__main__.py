@@ -1,5 +1,6 @@
 
-import onedns
+from . import app
 
 if __name__ == '__main__':
-    onedns.app()
+    theApp = app.OneDns()
+    theApp.run()
