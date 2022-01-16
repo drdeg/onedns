@@ -69,15 +69,13 @@ class OneDns:
             formatter_class=argparse.RawDescriptionHelpFormatter,
             add_help=True
         )
-        #parser.add_argument('--domain', '-d', type=str, help='Base domain name, e.g. domain.org')
-        #parser.add_argument('--subdomain', '-s', type=str, help='Subdomain to update, e.g. hostname')
         self._parser.add_argument('--username', type=str, help='Username at one.com')
         self._parser.add_argument('--password', type=str, help='Password at one.com')
         #self._parser.add_argument('--id', '-i', type=str, help='ID of corresponding A-record at one.com')
         self._parser.add_argument('--fqdn', type=str, help='FQDN of host to update, e.g. hostname.domain.org')
         self._parser.add_argument('--timeout', '-t', type=int, help='Timeout in seconds (TTL)')
-        self._parser.add_argument('--force', action='store_true', help='Force update of A-record')
         self._parser.add_argument('--log', help='Set log level', choices=['CRITICAL','ERROR','WARNING','INFO','DEBUG'], default='INFO')
+        self._parser.add_argument('--simulate', '-s', action='store_true', help='Just simulate, don''t update the record')
 
     def parseConfig(self):
         """ Parses argument list and configuration file """
@@ -98,8 +96,9 @@ class OneDns:
 
 
     def checkConfig(self):
-        assert self._args.username
-        assert self._args.password
+        assert self._args.username, 'Username not specified'
+        assert self._args.password, 'Password not specified'
+        assert self._args.fqdn, 'FQDN not specified'
 
         # Check the domain name
         parts = self._args.fqdn.split('.')
@@ -132,6 +131,40 @@ class OneDns:
         return '.'.join( self._args.fqdn.split('.')[:-2])
 
 
+    def validateIpAddress(self, ip) -> bool:
+        """ Check if an IPv4 address seems reasonable """
+
+        match = re.match(r"^(\d{1,3})\.(\d{1,3})\.(\d{1,3})\.(\d{1,3})$", ip)
+        if match:
+            parts = ip.split('.')
+            return all([ int(part) >= 0 and int(part) <= 255 for part in parts ])
+        else:
+            return False
+
+    def updateRecord(self, publicIp):
+        """ Updates the DNS record at one.com """
+
+        assert self.validateIpAddress(publicIp), "The public IP address is invalid"
+
+        # Split the FQDN into domain and subdomain (prefix)
+        domain = self.getDomain()
+        subdomain = self.getSubdomain()
+
+        # Create the API
+        od = OneDnsAPI()
+        od.loginSession(self._args.username, self._args.password)
+
+        # Get the records, and identify the matching one
+        records = od.getCustomRecords(domain)
+        id = od.findIdBySubdomain(records, subdomain)
+        if id:
+            if not self._args.simulate:
+                od.updateRecord(id, domain, subdomain, value = publicIp)
+            else:
+                logger.warning("Update not done, simulation mode enabled")
+        else:
+            logger.error("Couldn't determine the ID for the record")
+
     def run(self):
 
         # Set log level
@@ -148,27 +181,14 @@ class OneDns:
         # Get my public IP address
         publicIp = self.getPublicIp()
 
+        # Check if the resolved IP matches the public IP
         if publicIp == resolvedIp:
             logger.info(f"Public IP and resolved IP matches ({resolvedIp}), no need to update DNS record.")
             if not self._args.force:
                 return
         else:
             logger.info(f'Detected change of public IP address from {resolvedIp} to {publicIp}. Need to update DNS record.')
-
-        domain = self.getDomain()
-        subdomain = self.getSubdomain()
-        assert domain == 'varukulla.se'
-        assert subdomain == 'lovlund'
-
-        od = OneDnsAPI()
-        od.loginSession(self._args.username, self._args.password)
-        records = od.getCustomRecords(domain)
-        id = od.findIdBySubdomain(records, subdomain)
-        if id:
-            #od.updateRecord(id, domain, subdomain, value = '95.155.200.227')
-            od.updateRecord(id, domain, subdomain, value = publicIp)
-        else:
-            logger.error("Couldn't determine the ID for the record")
+            self.updateRecord(publicIp)
 
 
 if __name__ == '__main__':
