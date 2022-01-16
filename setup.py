@@ -8,7 +8,7 @@ with open("requirements.txt", "r") as fh:
 
 setuptools.setup(
     name="onedns-drdeg", # Replace with your own username
-    version="0.0.1",
+    version="0.1",
     author="David Degerfeldt",
     author_email="david@degerfeldt.se",
     description="A package for updating DNS A-records at one.com",
